@@ -1411,15 +1411,20 @@ func (ui *ui) readNormalEvent(ev tcell.Event, nav *nav) expr {
 			return nil
 		}
 
+		// TODO consider handling double click in single iteration if possible
 		if ui.lastClick != nil &&
 			ui.lastClick.Buttons() == tev.Buttons() &&
 			time.Since(ui.lastClick.When()) < 1*time.Second {
 			lastX, lastY := ui.lastClick.Position()
 			x, y := tev.Position()
 
+			// TODO handle <c- modifiers
+			button = "<2-" + button[1:]
 			if x == lastX && y == lastY {
 				// TODO
 			}
+		} else {
+			// TODO handle last click and then handle new click
 		}
 
 		var dir *dir

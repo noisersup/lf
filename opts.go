@@ -103,6 +103,7 @@ var gOpts struct {
 	preserve           []string
 	shellopts          []string
 	keys               map[string]expr
+	mouseClicks        map[string]expr
 	cmdkeys            map[string]expr
 	cmds               map[string]expr
 	user               map[string]string
@@ -267,6 +268,7 @@ func init() {
 	gOpts.keys["k"] = &callExpr{"up", nil, 1}
 	gOpts.keys["<up>"] = &callExpr{"up", nil, 1}
 	gOpts.keys["<m-up>"] = &callExpr{"up", nil, 1}
+	gOpts.keys["<2-m-1>"] = &callExpr{"echo", nil, 1}
 	gOpts.keys["<c-u>"] = &callExpr{"half-up", nil, 1}
 	gOpts.keys["<c-b>"] = &callExpr{"page-up", nil, 1}
 	gOpts.keys["<pgup>"] = &callExpr{"page-up", nil, 1}
