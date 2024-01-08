@@ -429,6 +429,7 @@ func (app *app) loop() {
 
 			app.ui.draw(app.nav)
 		case ev := <-app.ui.evChan:
+			// TODO
 			e := app.ui.readEvent(ev, app.nav)
 			if e == nil {
 				continue
@@ -438,6 +439,7 @@ func (app *app) loop() {
 			for {
 				select {
 				case ev := <-app.ui.evChan:
+					// TODO
 					e = app.ui.readEvent(ev, app.nav)
 					if e == nil {
 						continue

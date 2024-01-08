@@ -1421,10 +1421,38 @@ func (ui *ui) readNormalEvent(ev tcell.Event, nav *nav) expr {
 			// TODO handle <c- modifiers
 			button = "<2-" + button[1:]
 			if x == lastX && y == lastY {
+				binds, ok := findBinds(gOpts.keys, string(ui.keyAcc))
+
+				if ok {
+					if len(ui.keyCount) > 0 {
+						c, err := strconv.Atoi(string(ui.keyCount))
+						if err != nil {
+							log.Printf("converting command count: %s", err)
+						}
+						count = c
+					}
+					expr := gOpts.keys[string(ui.keyAcc)]
+
+					if e, ok := expr.(*callExpr); ok && count != 0 {
+						expr = &callExpr{e.name, e.args, e.count}
+						expr.(*callExpr).count = count
+					} else if e, ok := expr.(*listExpr); ok && count != 0 {
+						expr = &listExpr{e.exprs, e.count}
+						expr.(*listExpr).count = count
+					}
+
+					ui.keyAcc = nil
+					ui.keyCount = nil
+					ui.menuBuf = nil
+					return expr
+				}
+				ui.menuBuf = listBinds(binds)
+				return draw
+
 				// TODO
 			}
 		} else {
-			// TODO handle last click and then handle new click
+			// handle click normally
 		}
 
 		var dir *dir
@@ -1500,6 +1528,29 @@ func readCmdEvent(ev tcell.Event) expr {
 		}
 	}
 	return nil
+}
+
+func (ui *ui) doubleClickMiddleware(ev tcell.Event, nav *nav, next func(tcell.Event, *nav) expr) expr {
+	switch tev := ev.(type) {
+	case *tcell.EventMouse:
+		if ui.lastClick != nil &&
+			ui.lastClick.Buttons() == tev.Buttons() &&
+			time.Since(ui.lastClick.When()) < 1*time.Second {
+			lastX, lastY := ui.lastClick.Position()
+			x, y := tev.Position()
+
+			// TODO handle <c- modifiers
+			button := "<2-" + button[1:]
+			if x == lastX && y == lastY {
+				// TODO
+			}
+		} else {
+			// TODO handle last click and then handle new click
+		}
+	default:
+		return next(ev, nav)
+	}
+	// TODO consider handling double click in single iteration if possible
 }
 
 func (ui *ui) readEvent(ev tcell.Event, nav *nav) expr {
