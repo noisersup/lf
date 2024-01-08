@@ -581,6 +581,8 @@ type ui struct {
 	styles      styleMap
 	icons       iconMap
 	currentFile string
+
+	lastClick *tcell.EventMouse
 }
 
 func newUI(screen tcell.Screen) *ui {
@@ -1349,6 +1351,7 @@ func (ui *ui) readNormalEvent(ev tcell.Event, nav *nav) expr {
 			ui.menuBuf = listBinds(binds)
 			return draw
 		}
+		// NOTE: here I guess
 	case *tcell.EventMouse:
 		if ui.cmdPrefix != "" {
 			return nil
@@ -1398,10 +1401,25 @@ func (ui *ui) readNormalEvent(ev tcell.Event, nav *nav) expr {
 			return draw
 		}
 
+		defer func() {
+			ui.lastClick = tev
+		}()
+
 		x, y := tev.Position()
 		wind, w := ui.winAt(x, y)
 		if wind == -1 {
 			return nil
+		}
+
+		if ui.lastClick != nil &&
+			ui.lastClick.Buttons() == tev.Buttons() &&
+			time.Since(ui.lastClick.When()) < 1*time.Second {
+			lastX, lastY := ui.lastClick.Position()
+			x, y := tev.Position()
+
+			if x == lastX && y == lastY {
+				// TODO
+			}
 		}
 
 		var dir *dir
